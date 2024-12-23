@@ -54,6 +54,9 @@ const execDiff = async (
         );
         outPath = join(dirname(revised), outName);
     }
+    if (!outPath.endsWith(".html")) {
+        outPath += ".html";
+    }
 
     await Deno.writeTextFile(outPath, result);
     return 0;
@@ -61,11 +64,11 @@ const execDiff = async (
 
 const main = async () => {
     const flags = parseArgs(Deno.args, {
-        string: ["origin", "revised", "outPath"],
+        string: ["origin", "revised", "out"],
         default: {
             origin: "",
             revised: "",
-            outPath: "",
+            out: "",
         },
     });
     const invalids = [flags.origin, flags.revised].filter((p) => !exists(p));
@@ -75,7 +78,7 @@ const main = async () => {
         });
         Deno.exit(1);
     }
-    const result = await execDiff(flags.origin, flags.revised, flags.outPath);
+    const result = await execDiff(flags.origin, flags.revised, flags.out);
     Deno.exit(result);
 };
 
