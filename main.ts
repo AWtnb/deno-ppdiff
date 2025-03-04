@@ -38,8 +38,9 @@ const execDiff = async (
     const r = decoder.decode(await Deno.readFile(revised));
 
     const dmp = new diff_match_patch();
+    dmp.Diff_Timeout = 0;
     const diff = dmp.diff_main(o, r);
-    dmp.diff_cleanupSemantic(diff);
+    dmp.diff_cleanupSemanticLossless(diff);
     const markup = dmp.diff_prettyHtml(diff);
 
     const title = sprintf("'%s'→'%s'", basename(origin), basename(revised));
