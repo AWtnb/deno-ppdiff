@@ -25,12 +25,6 @@ del {
   color: #929292;
 }
 
-ins:focus, del:focus {
-  outline: .25em solid orange;
-  opacity: 0.9;
-  border-radius: 2px;
-}
-
 br {
   display: block;
   content: "";
@@ -102,6 +96,12 @@ export class DomTree {
         });
     }
 
+    private InertDel() {
+        this.root.querySelectorAll("del").forEach((elem) => {
+            elem.setAttribute("inert", "");
+        });
+    }
+
     private CleanupStyle() {
         this.root.querySelectorAll("ins, del").forEach((elem) => {
             elem.removeAttribute("style");
@@ -116,6 +116,10 @@ export class DomTree {
         this.SetCss();
         this.CleanupStyle();
         this.SetTabIndex();
-        return ("<!DOCTYPE html>" + this.root.outerHTML).replaceAll("\u00B6", "\u21B5");
+        this.InertDel();
+        return ("<!DOCTYPE html>" + this.root.outerHTML).replaceAll(
+            "\u00B6",
+            "\u21B5",
+        );
     }
 }
