@@ -28,14 +28,18 @@ const toStem = (path: string): string => {
     return basename(path, extname(path));
 };
 
+const toLineFeed = (s: string): string => {
+    return s.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
+};
+
 const execDiff = async (
     origin: string,
     revised: string,
     outPath: string,
 ): Promise<number> => {
     const decoder = new TextDecoder("utf-8");
-    const o = decoder.decode(await Deno.readFile(origin));
-    const r = decoder.decode(await Deno.readFile(revised));
+    const o = toLineFeed(decoder.decode(await Deno.readFile(origin)));
+    const r = toLineFeed(decoder.decode(await Deno.readFile(revised)));
 
     const dmp = new diff_match_patch();
     dmp.Diff_Timeout = 0;
