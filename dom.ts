@@ -1,3 +1,11 @@
+// @ts-types="npm:@types/diff-match-patch"
+import {
+    Diff,
+    DIFF_DELETE,
+    DIFF_EQUAL,
+    DIFF_INSERT,
+} from "npm:diff-match-patch";
+
 import { sprintf } from "jsr:@std/fmt/printf";
 import { DOMParser, Element } from "jsr:@b-fuze/deno-dom";
 import { escape } from "jsr:@std/html";
@@ -25,20 +33,54 @@ del {
   color: #929292;
 }
 
-br {
-  display: block;
-  content: "";
-  margin: 0.5em 0;
+
+.break::after {
+  content: "\\21B5";
+  color: #929292;
 }
 `;
+
+// https://github.com/google/diff-match-patch/blob/62f2e689f498f9c92dbc588c58750addec9b1654/javascript/diff_match_patch_uncompressed.js#L1251
+const toHtml = (diffs: Diff[]): string => {
+    const html = [];
+    const pattern_amp = /&/g;
+    const pattern_lt = /</g;
+    const pattern_gt = />/g;
+    const pattern_para = /\n/g;
+    const br = `<span class="break"></span><br>`;
+    let i = 1;
+    for (let x = 0; x < diffs.length; x++) {
+        const op = diffs[x][0]; // Operation (insert, delete, equal)
+        const data = diffs[x][1]; // Text of change.
+        const text = data.replace(pattern_amp, "&amp;").replace(
+            pattern_lt,
+            "&lt;",
+        ).replace(pattern_gt, "&gt;").replace(pattern_para, br);
+        switch (op) {
+            case DIFF_INSERT:
+                html[x] = `<ins tabindex="${i}">` + text + "</ins>";
+                i += 1;
+                break;
+            case DIFF_DELETE:
+                html[x] = `<del tabindex="${i}" inert>` + text + "</del>";
+                i += 1;
+                break;
+            case DIFF_EQUAL:
+                html[x] = "<span>" + text + "</span>";
+                break;
+        }
+    }
+    return html.join("");
+};
 
 export class DomTree {
     private readonly root: Element;
     private readonly escapedTitle: string;
 
-    constructor(title: string, markup: string) {
+    constructor(title: string, diffs: Diff[]) {
         this.escapedTitle = escape(title);
 
+        const markup = toHtml(diffs);
         const container = sprintf(
             `<div id="diff-container">%s%s</div>`,
             `<h1>${this.escapedTitle}</h1>`,
@@ -90,36 +132,12 @@ export class DomTree {
         this.GetHead().innerHTML += `<style>${CSS}</style>`;
     }
 
-    private SetTabIndex() {
-        this.root.querySelectorAll("ins, del").forEach((elem, i) => {
-            elem.setAttribute("tabindex", i + 1);
-        });
-    }
-
-    private InertDel() {
-        this.root.querySelectorAll("del").forEach((elem) => {
-            elem.setAttribute("inert", "");
-        });
-    }
-
-    private CleanupStyle() {
-        this.root.querySelectorAll("ins, del").forEach((elem) => {
-            elem.removeAttribute("style");
-        });
-    }
-
     Stringify(): string {
         this.SetLang();
         this.SetMeta();
         this.SetFavicon();
         this.SetTitle();
         this.SetCss();
-        this.CleanupStyle();
-        this.SetTabIndex();
-        this.InertDel();
-        return ("<!DOCTYPE html>" + this.root.outerHTML).replaceAll(
-            "\u00B6",
-            "\u21B5",
-        );
+        return ("<!DOCTYPE html>" + this.root.outerHTML);
     }
 }

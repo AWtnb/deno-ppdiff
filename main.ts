@@ -45,10 +45,9 @@ const execDiff = async (
     dmp.Diff_Timeout = 0;
     const diff = dmp.diff_main(o, r);
     dmp.diff_cleanupSemanticLossless(diff);
-    const markup = dmp.diff_prettyHtml(diff);
 
     const title = sprintf("'%s'→'%s'", basename(origin), basename(revised));
-    const dt = new DomTree(title, markup);
+    const dt = new DomTree(title, diff);
     const result = dt.Stringify();
 
     if (outPath.length < 1) {
