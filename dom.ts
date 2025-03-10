@@ -31,12 +31,7 @@ del {
   background: #a4e5ff;
   border: 1px solid #05374b;
   color: #929292;
-}
-
-
-.break::after {
-  content: "\\21B5";
-  color: #929292;
+  user-select: none;
 }
 `;
 
@@ -47,7 +42,7 @@ const toHtml = (diffs: Diff[]): string => {
     const pattern_lt = /</g;
     const pattern_gt = />/g;
     const pattern_para = /\n/g;
-    const br = `<span class="break"></span><br>`;
+    const br = `<span inert style="color: #929292">&crarr;</span><br>`;
     let i = 1;
     for (let x = 0; x < diffs.length; x++) {
         const op = diffs[x][0]; // Operation (insert, delete, equal)
@@ -62,7 +57,7 @@ const toHtml = (diffs: Diff[]): string => {
                 i += 1;
                 break;
             case DIFF_DELETE:
-                html[x] = `<del tabindex="${i}" inert>` + text + "</del>";
+                html[x] = `<del tabindex="${i}">` + text + "</del>";
                 i += 1;
                 break;
             case DIFF_EQUAL:
