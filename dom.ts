@@ -16,21 +16,21 @@ const CSS = `
   margin: auto;
   font-family: "HackGen";
   font-size: 16px;
-  line-height: 1.25;
+  line-height: 1.5;
   word-break: break-all;
 }
 
 ins {
   border-radius: 4px;
   background: #ffbebe;
-  border: 2px solid tomato;
+  border: 1px solid tomato;
   text-decoration: none;
 }
 
 del+ins {
-  border-style: dashed;
-  border-width: 1px;
+  border-width: 2px 2px 2px 1px;
   border-radius: 0 4px 4px 0;
+  color: #d12608;
 }
 
 del {
@@ -38,6 +38,13 @@ del {
   border: 1px solid #05374b;
   color: #929292;
   user-select: none;
+  border-radius: 4px;
+}
+
+del:has(+ ins) {
+  border-radius: 4px 0 0 4px;
+  border-width: 2px 1px 2px 2px;
+  border-color: tomato;
 }
 `;
 
